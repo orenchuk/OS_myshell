@@ -1,0 +1,27 @@
+/Applications/CLion.app/Contents/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /Users/rostykpopov/Documents/ucu/OS_myshell
+CMake Warning at /Applications/CLion.app/Contents/bin/cmake/share/cmake-3.7/Modules/FindBoost.cmake:761 (message):
+  Imported targets not available for Boost version 106600
+Call Stack (most recent call first):
+  /Applications/CLion.app/Contents/bin/cmake/share/cmake-3.7/Modules/FindBoost.cmake:865 (_Boost_COMPONENT_DEPENDENCIES)
+  /Applications/CLion.app/Contents/bin/cmake/share/cmake-3.7/Modules/FindBoost.cmake:1454 (_Boost_MISSING_DEPENDENCIES)
+  CMakeLists.txt:4 (find_package)
+
+
+CMake Warning at /Applications/CLion.app/Contents/bin/cmake/share/cmake-3.7/Modules/FindBoost.cmake:761 (message):
+  Imported targets not available for Boost version 106600
+Call Stack (most recent call first):
+  /Applications/CLion.app/Contents/bin/cmake/share/cmake-3.7/Modules/FindBoost.cmake:865 (_Boost_COMPONENT_DEPENDENCIES)
+  /Applications/CLion.app/Contents/bin/cmake/share/cmake-3.7/Modules/FindBoost.cmake:1454 (_Boost_MISSING_DEPENDENCIES)
+  CMakeLists.txt:4 (find_package)
+
+
+-- Boost version: 1.66.0
+-- Found the following Boost libraries:
+--   system
+--   filesystem
+-- Boost_INCLUDE_DIRS: /usr/local/Cellar/boost/1.66.0/include
+-- Boost_LIBRARIES: /usr/local/Cellar/boost/1.66.0/lib/libboost_system-mt.dylib;/usr/local/Cellar/boost/1.66.0/lib/libboost_filesystem-mt.dylib
+-- Boost_VERSION: 106600
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/rostykpopov/Documents/ucu/OS_myshell/cmake-build-debug
