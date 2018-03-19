@@ -7,7 +7,6 @@
 #include <sstream>
 #include <vector>
 #include <string.h>
-
 using namespace std;
 
 void cwd(){
@@ -33,15 +32,7 @@ int main(){
     string cmd;
     while(1){
         cin>>cmd;
-        if(cmd.compare("exit") == 0){
-            exit(EXIT_SUCCESS);
-        }
-        else{
-            vector<string> vector1 = parse_args(cmd);
-            for (int i = 0; i < vector1.size(); ++i) {
-                cout<<vector1[i]<<" ";
-            }
-        }
+        vector args = parse_args(cmd);
     }
     return 0;
 }
