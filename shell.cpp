@@ -36,21 +36,21 @@ int myexit(vector<string> args){
     if(args.size() == 3){
         if(args[2] == "-h" && args[2] == "--help"){
             cout<<help;
-            string num = args[3];
+            string num = args[2];
             exit_num = stoi(num);
         }
         else{
-            string num = args[2];
+            string num = args[1];
             exit_num = stoi(num);
             cout<<help;
         }
     }
     else{
-        if (args[2] == "-h" && args[2] == "--help"){
+        if (args[1] == "-h" && args[1] == "--help"){
             cout<<help;
         }
         else{
-            string num = args[2];
+            string num = args[1];
             exit_num = stoi(num);
         }
     }
