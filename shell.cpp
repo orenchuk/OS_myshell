@@ -1,26 +1,24 @@
-//
-// Created by Rostyk Popov on 3/18/18.
-//
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 #include <sstream>
 #include <vector>
 #include <string.h>
+
 using namespace std;
 
-void cwd(){
+void cwd() {
     char dir[100];
     getcwd(dir, 100);
     cout<<dir;
 }
-void cd(string path){
+void cd(string path) {
     chdir(path.c_str());
 }
-vector<string>parse_args(string str){
+vector<string> parse_args(string str) {
     vector<string> vector1;
     istringstream iss(str);
-    while(iss){
+    while(iss) {
         string subs;
         iss>>subs;
         vector1.push_back(subs);
@@ -28,14 +26,31 @@ vector<string>parse_args(string str){
     vector1.pop_back();
     return vector1;
 }
-int main(){
-    string cmd;
-    while(1){
-        cin>>cmd;
-        vector<string> args = parse_args(cmd);
-        if(){
 
+void execute(vector<string> args) {
+    
+}
+
+vector<string> read_args(string cmd) {
+    vector<string> args;
+    
+    if (cmd == "exit") {
+        exit(0);
+    }
+    args.push_back(cmd);
+    return args;
+}
+
+int main() {
+    string cmd;
+    vector<string> args;
+    
+    while(cin >> cmd) {
+        args = read_args(cmd);
+        for (auto &a : args) {
+            cout << a << endl;
         }
     }
+    
     return 0;
 }
