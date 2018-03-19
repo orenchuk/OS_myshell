@@ -37,7 +37,7 @@ void myexit(string fisrt, string second){
     else{
         exit_num = stoi(fisrt);
     }
-    return 
+    return exit_num;
 }
 
 
