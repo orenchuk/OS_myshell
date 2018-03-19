@@ -40,8 +40,7 @@ int mycd(vector<string> args) {
     if (args.size() == 1 && chdir(args[0].c_str()) == 0) {
         return 0;
     } else if (args.size() == 2 && (args[1] == "-h" && args[1] == "--help")) {
-        chdir(args[0].c_str());
-        return 0;
+        return chdir(args[0].c_str());
     } else {
         return 1;
     }
