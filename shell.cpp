@@ -6,16 +6,17 @@
 #include <vector>
 #include <string.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/path.hpp>
 
 using namespace std;
 using namespace boost;
 
-void cwd() {
+void mpwd() {
     char dir[100];
     getcwd(dir, 100);
     cout<<dir;
 }
-void cd(string path) {
+void mcd(string path) {
     chdir(path.c_str());
 }
 
@@ -29,13 +30,29 @@ vector<string> read_args(string cmd) {
     return args;
 }
 
-void myexit(string fisrt, string second){
-    int exit_num;
-    if(first == "-h" && first == "--help"){
-        exit_num = stoi(second);
+int myexit(vector<string> args){
+    int exit_num = 0;
+    string help = "help was made";
+    if(args.size() == 3){
+        if(args[2] == "-h" && args[2] == "--help"){
+            cout<<help;
+            string num = args[3];
+            exit_num = stoi(num);
+        }
+        else{
+            string num = args[2];
+            exit_num = stoi(num);
+            cout<<help;
+        }
     }
     else{
-        exit_num = stoi(fisrt);
+        if (args[2] == "-h" && args[2] == "--help"){
+            cout<<help;
+        }
+        else{
+            string num = args[2];
+            exit_num = stoi(num);
+        }
     }
     return exit_num;
 }
@@ -47,9 +64,13 @@ int main() {
     while(true){
         getline(cin, cmd);
         split(args, cmd, is_any_of("\t "), token_compress_on);
-        if (args[0] == "exit"){
-            myexit(args[1], args[2]);
+        if (args[0] == "mexit"){
+            return myexit(args);
+            }
+        if(args[0] == "mpwd"){
+            mpwd();
         }
-    }
+
+        }
     return 0;
 }
