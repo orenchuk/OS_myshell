@@ -6,15 +6,14 @@
 #include <vector>
 #include <string.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 using namespace std;
 using namespace boost;
 
 void mpwd() {
-    char dir[100];
-    getcwd(dir, 100);
-    cout<<dir;
+    auto path = boost::filesystem::current_path().string();
+    cout<<path;
 }
 void mcd(string path) {
     chdir(path.c_str());
@@ -45,7 +44,7 @@ int myexit(vector<string> args){
             cout<<help;
         }
     }
-    else{
+    else if (args.size() == 2){
         if (args[1] == "-h" && args[1] == "--help"){
             cout<<help;
         }
@@ -53,6 +52,9 @@ int myexit(vector<string> args){
             string num = args[1];
             exit_num = stoi(num);
         }
+    }
+    else{
+        return exit_num;
     }
     return exit_num;
 }
@@ -62,6 +64,8 @@ int main() {
     string cmd;
     vector<string> args;
     while(true){
+        mpwd();
+        cout<<" $ ";
         getline(cin, cmd);
         split(args, cmd, is_any_of("\t "), token_compress_on);
         if (args[0] == "mexit"){
