@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/rostykpopov/Documents/ucu/OS_myshell/shell.cpp
+iostream
+-
+stdio.h
+-
+unistd.h
+-
+sstream
+-
+vector
+-
+string.h
+-
+
