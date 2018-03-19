@@ -10,13 +10,17 @@
 using namespace std;
 using namespace boost;
 
-int mypwd(vector<string> args) {
+string pwd() {
+    return filesystem::current_path().string();
+}
+
+int mypwd(vector<string> args = {}) {
     int erno = 0;
     string help = "[-h|--help] - returns current directory path";
     string error = "Error: there are no such options, use -h or --help to get more info";
     
     if (args.size() == 0) {
-        auto cwd = filesystem::current_path().string();
+        auto cwd = pwd();
         cout << cwd << endl;
     } else if ((args.size() == 1) && ((args[0] == "-h") || (args[0] == "--help"))) {
         cout << help << endl;
@@ -97,6 +101,7 @@ int main() {
     string cmd;
     vector<string> args;
     while(true) {
+        cout << pwd() << "$ ";
         getline(cin, cmd);
         split(args, cmd, is_any_of(" "), token_compress_on);
         execute(args);
