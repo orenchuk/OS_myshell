@@ -4,14 +4,18 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <libgen.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
-using namespace std;
-using namespace boost;
+using std::cout;
+using std::cin;
+using std::endl;
+using std::string;
+using std::vector;
 
-string pwd() {
-    return filesystem::current_path().string();
+boost::filesystem::path pwd() {
+    return boost::filesystem::current_path();
 }
 
 int mypwd(vector<string> args = {}) {
@@ -20,7 +24,7 @@ int mypwd(vector<string> args = {}) {
     string error = "Error: there are no such options, use -h or --help to get more info";
     
     if (args.size() == 0) {
-        auto cwd = pwd();
+        auto cwd = pwd().string();
         cout << cwd << endl;
     } else if ((args.size() == 1) && ((args[0] == "-h") || (args[0] == "--help"))) {
         cout << help << endl;
@@ -33,13 +37,9 @@ int mypwd(vector<string> args = {}) {
 }
 
 int mycd(vector<string> args) {
-    for (auto &a : args) {
-        cout << "test: " << a << endl;
-    }
-    
     if (args.size() == 1 && chdir(args[0].c_str()) == 0) {
         return 0;
-    } else if(args.size() > 1 || (args[1] == "-h" && args[1] == "--help")) {
+    } else if (args.size() == 2 && (args[1] == "-h" && args[1] == "--help")) {
         chdir(args[0].c_str());
         return 0;
     } else {
@@ -82,18 +82,23 @@ void execute(vector<string> args) {
     string cmd = args[0];
     args.erase(args.begin());
     
-    //    for (auto &a : args) {
-    //        cout << "test: " << a << endl;
-    //    }
-    
     if (cmd == "merrno") {
-        cout<<err_code;
+        cout << err_code << endl;
     } else if (cmd == "mpwd") {
         err_code = mypwd(args);
     } else if (cmd == "mcd") {
         err_code = mycd(args);
     } else if (cmd == "mexit") {
         myexit(args);
+    } else if (cmd == "help") {
+        cout << "Program MyShell. version 1.0 beta release\n" << endl;
+        cout << "merrno [-h|--help] \t returns exit status of the command" << endl;
+        cout << "mpwd [-h|--help] \t returns current directory path" << endl;
+        cout << "mcd <path> [-h|--help] \t change dir to <path>" << endl;
+        cout << "mexit [exit code] [-h|--help] \t exit myshell\n" << endl;
+    } else {
+        err_code = -1;
+        cout << "Error: no such command, type `help` to get more info" << endl;
     }
 }
 
@@ -101,13 +106,10 @@ int main() {
     string cmd;
     vector<string> args;
     while(true) {
-        cout << pwd() << "$ ";
+        cout <<"Computer:" << pwd().filename().string() << " user$ ";
         getline(cin, cmd);
-        split(args, cmd, is_any_of(" "), token_compress_on);
+        boost::split(args, cmd, boost::is_any_of(" "), boost::token_compress_on);
         execute(args);
-        //        for (auto &a : args) {
-        //            cout << "test: " << a << endl;
-        //        }
     }
     return 0;
 }
