@@ -10,13 +10,22 @@
 using namespace std;
 using namespace boost;
 
-void mypwd() {
+int mypwd(vector<string> args) {
     auto cwd = filesystem::current_path().string();
     cout << cwd << endl;
+    return chdir(cwd.c_str());
 }
 
-void mycd(string path) {
-    chdir(path.c_str());
+int mycd(vector<string> args) {
+    if (args.size() == 1 || chdir(args[0].c_str()) == 0){
+        return 0;
+    }
+    else if(args.size() > 1 || (args[1] == "-h" && args[1] == "--help"){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }
 
 void myexit(vector<string> args) {
@@ -50,20 +59,17 @@ void myexit(vector<string> args) {
 }
 
 void execute(vector<string> args) {
+    int err_code = 0;
     string cmd = args[0];
-    //    cout << "cmd: " << cmd << endl;
     args.erase(args.begin());
-    //    for (auto &a : args) {
-    //        cout << a << endl;
-    //    }
     if (cmd == "merrno") {
-        
+        cout<<err_code;
     } else if (cmd == "mpwd") {
-        mypwd();
+        err_code = mypwd();
     } else if (cmd == "mcd") {
         mycd("../");
     } else if (cmd == "mexit") {
-        myexit(args);
+        err_code = myexit(args);
     }
 }
 
