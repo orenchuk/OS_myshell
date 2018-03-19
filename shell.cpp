@@ -11,20 +11,34 @@ using namespace std;
 using namespace boost;
 
 int mypwd(vector<string> args) {
-    auto cwd = filesystem::current_path().string();
-    cout << cwd << endl;
-    return chdir(cwd.c_str());
+    int erno = 0;
+    string help = "[-h|--help] - returns current directory path";
+    string error = "Error: there are no such options, use -h or --help to get more info";
+    
+    if (args.size() == 0) {
+        auto cwd = filesystem::current_path().string();
+        cout << cwd << endl;
+    } else if ((args.size() == 1) && ((args[0] == "-h") || (args[0] == "--help"))) {
+        cout << help << endl;
+    } else {
+        erno = -1;
+        cout << error << endl;
+    }
+    
+    return erno;
 }
 
 int mycd(vector<string> args) {
-    if (args.size() == 1 || chdir(args[0].c_str()) == 0){
-        return 0;
+    for (auto &a : args) {
+        cout << "test: " << a << endl;
     }
-    else if(args.size() > 1 || (args[1] == "-h" && args[1] == "--help")){
-        chdir(args[0].c_str();
+    
+    if (args.size() == 1 && chdir(args[0].c_str()) == 0) {
         return 0;
-    }
-    else{
+    } else if(args.size() > 1 || (args[1] == "-h" && args[1] == "--help")) {
+        chdir(args[0].c_str());
+        return 0;
+    } else {
         return 1;
     }
 }
@@ -63,14 +77,19 @@ void execute(vector<string> args) {
     int err_code = 0;
     string cmd = args[0];
     args.erase(args.begin());
+    
+    //    for (auto &a : args) {
+    //        cout << "test: " << a << endl;
+    //    }
+    
     if (cmd == "merrno") {
         cout<<err_code;
     } else if (cmd == "mpwd") {
-        err_code = mypwd();
+        err_code = mypwd(args);
     } else if (cmd == "mcd") {
-        mycd("../");
+        err_code = mycd(args);
     } else if (cmd == "mexit") {
-        err_code = myexit(args);
+        myexit(args);
     }
 }
 
