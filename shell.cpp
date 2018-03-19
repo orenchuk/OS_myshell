@@ -14,8 +14,8 @@ void cwd(){
     getcwd(dir, 100);
     cout<<dir;
 }
-void cd(char* path){
-    chdir(path);
+void cd(string path){
+    chdir(path.c_str());
 }
 vector<string>parse_args(string str){
     vector<string> vector1;
@@ -32,7 +32,10 @@ int main(){
     string cmd;
     while(1){
         cin>>cmd;
-        vector args = parse_args(cmd);
+        vector<string> args = parse_args(cmd);
+        if(){
+
+        }
     }
     return 0;
 }
