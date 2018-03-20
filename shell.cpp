@@ -1,12 +1,9 @@
 #include <iostream>
-#include <stdio.h>
 #include <unistd.h>
-#include <sstream>
 #include <vector>
 #include <string>
-#include <libgen.h>
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/tokenizer.hpp>
 
 using std::cout;
 using std::cin;
@@ -89,6 +86,8 @@ void execute(vector<string> args) {
         err_code = mycd(args);
     } else if (cmd == "mexit") {
         myexit(args);
+    } else if (cmd == "mycat") {
+        cout << "will be soon" <<endl; //TO-DO: make possible to run external mycat program
     } else if (cmd == "help") {
         cout << "Program MyShell. version 1.0 beta release\n" << endl;
         cout << "merrno [-h|--help] \t returns exit status of the command" << endl;
@@ -102,12 +101,24 @@ void execute(vector<string> args) {
 }
 
 int main() {
-    string cmd;
-    vector<string> args;
+    string separator1("");      //dont let quoted arguments escape themselves
+    string separator2(" ");     //split on spaces
+    string separator3("\"\'");  //let it have quoted arguments
+    
     while(true) {
+        string cmd;
+        vector<string> args;
+        
         cout <<"Computer:" << pwd().filename().string() << " user$ ";
         getline(cin, cmd);
-        boost::split(args, cmd, boost::is_any_of(" "), boost::token_compress_on);
+        
+        boost::escaped_list_separator<char> els(separator1,separator2,separator3);
+        boost::tokenizer<boost::escaped_list_separator<char>> tok(cmd, els);
+        
+        for (auto &t : tok) {
+            args.push_back(t);
+        }
+        
         execute(args);
     }
     return 0;
