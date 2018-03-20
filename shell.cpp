@@ -1,5 +1,7 @@
 #include <iostream>
+#include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <vector>
 #include <string>
 #include <boost/filesystem/operations.hpp>
@@ -11,6 +13,21 @@ using std::endl;
 using std::string;
 using std::vector;
 
+
+vector<char*> str_char(vector<string> strings){
+    vector<string>::iterator it;
+    it = strings.begin();
+    it = strings.insert(it, "./mycat");
+    vector<char*> vector1;
+    for(string str:strings){
+        char * new_char = new char[str.size()];
+        strcpy(new_char, str.c_str());
+        vector1.push_back(new_char);
+    }
+    vector1.push_back(NULL);
+    return vector1;
+
+}
 boost::filesystem::path pwd() {
     return boost::filesystem::current_path();
 }
@@ -91,7 +108,15 @@ void execute(vector<string> &args) {
     } else if (cmd == "mexit") {
         myexit(args);
     } else if (cmd == "mycat") {
-        cout << "will be soon" <<endl; //TO-DO: make possible to run external mycat program
+        pid_t pid = fork();
+        if(pid == 0){
+            vector<char*> args_char = str_char(args);
+            char * exec_args[args_char.size()];
+            for (int i = 0; i < args_char.size(); ++i) {
+                exec_args[i] = args_char[i];
+            }
+            execv(args_char[0], exec_args);
+        }
     } else if (cmd == "help") {
         cout << "Program MyShell. version 1.0 beta release\n" << endl;
         cout << "merrno [-h|--help] \t returns exit status of the command" << endl;
