@@ -34,11 +34,17 @@ int mypwd(vector<string> args = {}) {
 }
 
 int mycd(vector<string> args) {
+    string help = "[-h|--help] - change directory to <path>";
     if (args.size() == 1 && chdir(args[0].c_str()) == 0) {
         return 0;
-    } else if (args.size() == 2 && (args[1] == "-h" && args[1] == "--help")) {
+    } else if (args.size() == 2 && (args[1] == "-h" || args[1] == "--help")) {
+        cout<< help <<endl;
         return chdir(args[0].c_str());
-    } else {
+    }
+        else if(args.size() == 1 && (args[0] == "-h" || args[0] == "--help")){
+        cout << help << endl;
+    }
+    else {
         return 1;
     }
 }
