@@ -15,7 +15,7 @@ boost::filesystem::path pwd() {
     return boost::filesystem::current_path();
 }
 
-int mypwd(vector<string> args = {}) {
+int mypwd(vector<string> &args) {
     int erno = 0;
     string help = "[-h|--help] - returns current directory path";
     string error = "Error: there are no such options, use -h or --help to get more info";
@@ -33,7 +33,7 @@ int mypwd(vector<string> args = {}) {
     return erno;
 }
 
-int mycd(vector<string> args) {
+int mycd(vector<string> &args) {
     string help = "[-h|--help] - change directory to <path>";
     if (args.size() == 1 && chdir(args[0].c_str()) == 0) {
         return 0;
@@ -41,15 +41,13 @@ int mycd(vector<string> args) {
         cout<< help <<endl;
         return chdir(args[0].c_str());
     }
-        else if(args.size() == 1 && (args[0] == "-h" || args[0] == "--help")){
+    else if(args.size() == 1 && (args[0] == "-h" || args[0] == "--help")){
         cout << help << endl;
     }
-    else {
-        return 1;
-    }
+    return 1;
 }
 
-void myexit(vector<string> args) {
+void myexit(vector<string> &args) {
     int exit_num = 0;
     string help = "help was made";
     if(args.size() == 2) {
@@ -79,7 +77,7 @@ void myexit(vector<string> args) {
     exit(exit_num);
 }
 
-void execute(vector<string> args) {
+void execute(vector<string> &args) {
     int err_code = 0;
     string cmd = args[0];
     args.erase(args.begin());
