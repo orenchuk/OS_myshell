@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
 
 using std::cout;
@@ -14,7 +14,7 @@ using std::string;
 using std::vector;
 
 
-vector<char*> str_char(vector<string> strings){
+vector<char*> str_char(vector<string> strings) {
     vector<string>::iterator it;
     it = strings.begin();
     it = strings.insert(it, "./mycat");
@@ -96,8 +96,10 @@ void myexit(vector<string> &args) {
 
 void execute(vector<string> &args) {
     int err_code = 0;
+    if (args.empty()) {
+        exit(-2);
+    }
     string cmd = args[0];
-    args.erase(args.begin());
     
     if (cmd == "merrno") {
         cout << err_code << endl;
@@ -107,16 +109,7 @@ void execute(vector<string> &args) {
         err_code = mycd(args);
     } else if (cmd == "mexit") {
         myexit(args);
-    } else if (cmd == "mycat") {
-        pid_t pid = fork();
-        if(pid == 0){
-            vector<char*> args_char = str_char(args);
-            char * exec_args[args_char.size()];
-            for (int i = 0; i < args_char.size(); ++i) {
-                exec_args[i] = args_char[i];
-            }
-            execv(args_char[0], exec_args);
-        }
+        
     } else if (cmd == "help") {
         cout << "Program MyShell. version 1.0 beta release\n" << endl;
         cout << "merrno [-h|--help] \t returns exit status of the command" << endl;
@@ -124,8 +117,31 @@ void execute(vector<string> &args) {
         cout << "mcd <path> [-h|--help] \t change dir to <path>" << endl;
         cout << "mexit [exit code] [-h|--help] \t exit myshell\n" << endl;
     } else {
-        err_code = -1;
-        cout << "Error: no such command, type `help` to get more info" << endl;
+        pid_t pid = fork();
+        if (pid == -1)
+        {
+            std::cerr << "Failed to fork()" << std::endl;
+            exit(EXIT_FAILURE);
+        } else if (pid > 0) {
+            int status;
+            waitpid(pid, &status, 0);
+        } else {
+            auto path_ptr = getenv("PATH");
+            string path_var;
+            if (path_ptr != nullptr) {
+                path_var = path_ptr;
+            } else {
+                cout << "Error no such argumet(s), try \"help\" for more info" << endl;
+            }
+            path_var += ":.";
+            setenv("PATH", path_var.c_str(), 1);
+            vector<const char*> arg_for_c;
+            for (auto s: args)
+                arg_for_c.push_back(s.c_str());
+            arg_for_c.push_back(nullptr);
+            execvp(cmd.c_str(), const_cast<char* const*>(arg_for_c.data()));
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
@@ -138,7 +154,7 @@ int main() {
         string cmd;
         vector<string> args;
         
-        cout <<"Computer:" << pwd().filename().string() << " user$ ";
+        cout << "Computer:" << pwd().filename().string() << " user$ ";
         getline(cin, cmd);
         
         boost::escaped_list_separator<char> els(separator1,separator2,separator3);
