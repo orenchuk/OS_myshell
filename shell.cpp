@@ -13,21 +13,6 @@ using std::endl;
 using std::string;
 using std::vector;
 
-
-vector<char*> str_char(vector<string> strings) {
-    vector<string>::iterator it;
-    it = strings.begin();
-    it = strings.insert(it, "./mycat");
-    vector<char*> vector1;
-    for(string str:strings){
-        char * new_char = new char[str.size()];
-        strcpy(new_char, str.c_str());
-        vector1.push_back(new_char);
-    }
-    vector1.push_back(NULL);
-    return vector1;
-
-}
 boost::filesystem::path pwd() {
     return boost::filesystem::current_path();
 }
