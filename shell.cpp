@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include <unistd.h>
+#include <sys/wait.h>
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
 
