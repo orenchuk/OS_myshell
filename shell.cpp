@@ -17,7 +17,7 @@ boost::filesystem::path pwd() {
     return boost::filesystem::current_path();
 }
 
-int mypwd(vector<string> &args) {
+int mypwd(const vector<string>& args) {
     int erno = 0;
     string help = "[-h|--help] - returns current directory path";
     string error = "Error: there are no such options, use -h or --help to get more info";
@@ -35,7 +35,7 @@ int mypwd(vector<string> &args) {
     return erno;
 }
 
-int mycd(vector<string> &args) {
+int mycd(const vector<string>& args) {
     string help = "[-h|--help] - change directory to <path>";
     if (args.size() == 1 && chdir(args[0].c_str()) == 0) {
         return 0;
@@ -49,7 +49,7 @@ int mycd(vector<string> &args) {
     return 1;
 }
 
-void myexit(vector<string> &args) {
+void myexit(const vector<string>& args) {
     int exit_num = 0;
     string help = "help was made";
     if(args.size() == 2) {
@@ -79,12 +79,13 @@ void myexit(vector<string> &args) {
     exit(exit_num);
 }
 
-void execute(vector<string> &args) {
+void execute(vector<string>& args) {
     int err_code = 0;
     if (args.empty()) {
         exit(-2);
     }
     string cmd = args[0];
+    args.erase(args.begin());
     
     if (cmd == "merrno") {
         cout << err_code << endl;
@@ -121,6 +122,7 @@ void execute(vector<string> &args) {
             path_var += ":.";
             setenv("PATH", path_var.c_str(), 1);
             vector<const char*> arg_for_c;
+            arg_for_c.push_back(cmd.c_str());
             for (auto s: args)
                 arg_for_c.push_back(s.c_str());
             arg_for_c.push_back(nullptr);
