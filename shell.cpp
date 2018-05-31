@@ -6,6 +6,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
+#include <sys/wait.h>
 
 using std::cout;
 using std::cin;
