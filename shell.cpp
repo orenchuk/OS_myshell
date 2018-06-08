@@ -12,6 +12,8 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <errno.h>
+#include <fcntl.h>
 #include <boost/algorithm/string.hpp>
 
 using std::cout;
@@ -85,36 +87,6 @@ void myexit(vector<string>& args) {
     exit(exit_num);
 }
 
-void myforkexec(const vector<string>& args) {
-    
-    pid_t pid = fork();
-    if (pid == -1)
-    {
-        std::cerr << "Failed to fork()" << std::endl;
-        exit(EXIT_FAILURE);
-    } else if (pid > 0) {
-        int status;
-        waitpid(pid, &status, 0);
-    } else {
-        auto path_ptr = getenv("PATH");
-        string path_var;
-        if (path_ptr != nullptr) {
-            path_var = path_ptr;
-        } else {
-            std::cerr << "Error no such argumet(s), try \"help\" for more info" << endl;
-        }
-        path_var += ":.";
-        setenv("PATH", path_var.c_str(), 1);
-        vector<const char*> arg_for_c;
-        for (auto s: args)
-            arg_for_c.push_back(s.c_str());
-        arg_for_c.push_back(nullptr);
-        execvp(args.front().c_str(), const_cast<char* const*>(arg_for_c.data()));
-        std::cerr << "Error: there is no such argument(s)" << endl;
-        exit(EXIT_FAILURE);
-    }
-}
-
 vector<string> replace(vector<string>& args, std::map<string, string>& vars) {
     vector<string> new_args;
     for (auto& arg : args) {
@@ -137,6 +109,12 @@ vector<string> replace(vector<string>& args, std::map<string, string>& vars) {
 void setvars(std::map<string, string>& vars, const string& line) {
     vector<string> res;
     boost::split(res, line, boost::is_any_of("="));
+    if (res.back().front() == '`') {
+        res.back().erase(res.back().begin());
+    }
+    if (res.back().back() == '`') {
+        res.back().erase(res.back().end());
+    }
     vars[res.front()] = res.back();
     cout << res.front() << " is localy set to " << vars[res.front()] << endl;
 }
@@ -145,6 +123,12 @@ void mysetenv(string line, std::map<string, string>& vars) {
     if (boost::contains(line, "=")) {
         vector<string> res;
         boost::split(res, line, boost::is_any_of("="));
+        if (res.back().front() == '`') {
+            res.back().erase(res.back().begin());
+        }
+        if (res.back().back() == '`') {
+            res.back().erase(res.back().end());
+        }
         setenv(res.front().c_str(), res.back().c_str(), 1);
         cout << res.front() << " is exportly set to " << getenv(res.front().c_str()) << endl;
     } else if (boost::contains(line, "$")) {
@@ -154,6 +138,65 @@ void mysetenv(string line, std::map<string, string>& vars) {
         }
         cout << "variable " << line << " is exportly set to " << getenv(line.c_str()) << endl;
     }
+}
+
+void myexec(const vector<string>& args, int from, int to, bool back = false, bool err = false) {
+    pid_t pid = fork();
+    if (pid == -1) {
+        std::cerr << "Failed to fork()" << std::endl;
+        exit(EXIT_FAILURE);
+        
+    } else if (!back && pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+        
+    } else {
+        
+        if (back) {
+            close(0);
+            close(1);
+            close(2);
+        }
+        
+        if (err) {
+            if (from != -1) {
+                dup2(from, STDERR_FILENO);
+            }
+            
+            if (to != -1) {
+                dup2(to, STDERR_FILENO);
+            }
+        } else {
+            if (from != -1) {
+                dup2(from, STDIN_FILENO);
+            }
+            
+            if (to != -1) {
+                dup2(to, STDOUT_FILENO);
+            }
+        }
+        
+        auto path_ptr = getenv("PATH");
+        string path_var;
+        if (path_ptr != nullptr) {
+            path_var = path_ptr;
+        } else {
+            std::cerr << "Error no such argumet(s), try \"help\" for more info" << endl;
+        }
+        path_var += ":.";
+        setenv("PATH", path_var.c_str(), 1);
+        vector<const char*> arg_for_c;
+        for (auto s: args)
+            arg_for_c.push_back(s.c_str());
+        arg_for_c.push_back(nullptr);
+        execvp(args.front().c_str(), const_cast<char* const*>(arg_for_c.data()));
+        std::cerr << "Error: there is no such argument(s)" << endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
+void myforkexec(const vector<string>& args) {
+    myexec(args, -1, -1);
 }
 
 void execute_script(std::map<string, string>& vars, const vector<string>& args) {
@@ -203,6 +246,72 @@ void execute_script(std::map<string, string>& vars, const vector<string>& args) 
     
 }
 
+void conveyor(vector<string>& args, std::map<string, string>& vars) {
+    vector<vector<string>> parts;
+    vector<string> temp_args;
+    for (size_t i = 0; i < args.size(); ++i) {
+        if (args[i] != "|") {
+            temp_args.push_back(args[i]);
+        } else {
+            parts.push_back(replace(temp_args, vars));
+            temp_args.clear();
+        }
+    }
+    
+    parts.push_back(replace(temp_args, vars));
+    temp_args.clear();
+    
+    int pipfd[args.size()-1][2];
+    
+    for (size_t i = 0; i < parts.size() - 1; ++i) {
+        if (pipe(pipfd[i]) < 0) {
+            std::cerr << "Error: pipe init failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+    for (size_t i = 0; i < parts.size(); ++i) {
+        if (i == 0) {
+            myexec(parts[i], -1, pipfd[i][1]);
+            close(pipfd[i][1]);
+        } else  if (i == parts.size() - 1) {
+            myexec(parts[i], pipfd[i-1][0], -1);
+            close(pipfd[i-1][0]);
+        } else {
+            myexec(parts[i], pipfd[i-1][0], pipfd[i][1]);
+            close(pipfd[i-1][0]);
+            close(pipfd[i][1]);
+        }
+    }
+    
+}
+
+void redirect(const string& from_file, const string& to_file, bool reversed = false, bool err = false) {
+    
+    int fd;
+    
+    if ((fd = open(to_file.c_str(), O_RDWR | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR)) < 0) {
+        std::cerr << "Can't open file" << endl;
+        exit(1);
+    }
+    
+    vector<string> arg;
+    arg.push_back(from_file);
+    
+    if (!reversed) {
+        myexec(arg, -1, fd, false, err);
+    } else {
+        myexec(arg, fd, -1, false, err);
+    }
+    
+    close(fd);
+}
+
+void background(vector<string>& args, std::map<string, string>& vars) {
+    auto new_args = replace(args, vars);
+    myexec(new_args, -1, -1, true);
+}
+
 void execute(std::map<string, string>& vars, vector<string>& args) {
     int err_code = 0;
     if (args.empty()) {
@@ -233,6 +342,25 @@ void execute(std::map<string, string>& vars, vector<string>& args) {
             }
             mysetenv(a, vars);
         }
+    } else if (args.size() > 2) {
+        for (size_t i = 1; i < args.size() - 1; ++i) {
+            if (args[i] == ">") {
+                redirect(args[i-1], args[i+1]);
+            } else if (args[i] == "2>") {
+                redirect(args[i-1], args[i+1], false, true);
+                break;
+            } else if (args[i] == "<") {
+                redirect(args[i-1], args[i+1], true);
+                break;
+            } else if (args[i] == "2>&1") {
+                redirect(args[0], args[2], false, true);
+                redirect(args[0], args[2]);
+                break;
+            } else if (args[i] == "|") {
+                conveyor(args, vars);
+                break;
+            }
+        }
     } else if (boost::contains(cmd, "=")) {
         setvars(vars, cmd);
     } else if (cmd == "help") {
@@ -245,6 +373,9 @@ void execute(std::map<string, string>& vars, vector<string>& args) {
         if (cmd[0] == '.') {
             args.front().erase(args.front().begin());
             execute_script(vars, args);
+        } else if (args.back() == "&") {
+            args.pop_back();
+            background(args, vars);
         } else {
             myforkexec(replace(args, vars));
         }
